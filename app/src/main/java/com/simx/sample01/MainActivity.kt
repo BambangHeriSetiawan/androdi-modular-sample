@@ -9,42 +9,43 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import com.simx.data.Api
 import com.simx.data.ApiCallback
 import com.simx.data.ApiRequestManager
 import com.simx.model.ResponseDiscovery
+import com.simx.sample01.databinding.ActivityMainBinding
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,ApiCallback {
-
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+    lateinit var mainViewModel: MainViewModel
+    lateinit var activityMainBinding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
+        /*setContentView(R.layout.activity_main)*/
+        activityMainBinding = DataBindingUtil.setContentView(this,R.layout.activity_main)
+        mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        activityMainBinding.mainvm = mainViewModel
+        setSupportActionBar(activityMainBinding.toolbar)
 
-        fab.setOnClickListener { view ->
+
+        activityMainBinding.fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }
 
         val toggle = ActionBarDrawerToggle(
-                this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-        drawer_layout.addDrawerListener(toggle)
+                this, drawer_layout, activityMainBinding.toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+        activityMainBinding.drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
-        ApiRequestManager(this).getDiscoveryMovie()
     }
 
 
-    override fun onNext(responseDiscovery: ResponseDiscovery) {
-        Log.e("MainActivity","onNext"+ responseDiscovery.results!!.size)
-    }
-
-    override fun onError(throwable: Throwable) {
-        Log.e("MainActivity","onError"+ throwable.message)
-    }
 
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
